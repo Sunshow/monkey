@@ -127,8 +127,8 @@ func patchValue(target reflect.Value, replacement reflect.Value, alias *reflect.
 	var aliasBytes []byte
 	if alias != nil {
 		addr = new(uintptr)
-		*addr = *(*uintptr)(getPtr(target)) + codeOffset()
-		aliasPos = (*alias).Pointer() + codeOffset()
+		*addr = *(*uintptr)(getPtr(target)) + codeOffset(target.Pointer())
+		aliasPos = (*alias).Pointer() + codeOffset((*alias).Pointer())
 		aliasBytes = replaceFunction(aliasPos, (uintptr)(unsafe.Pointer(addr)))
 	}
 
