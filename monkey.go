@@ -12,6 +12,9 @@ import (
 type patch struct {
 	originalBytes []byte
 	replacement   *reflect.Value
+	aliasPatchedPos  uintptr
+	aliasOriginalBytes []byte
+	addr *uintptr
 }
 
 var (
@@ -32,6 +35,7 @@ func getPtr(v reflect.Value) unsafe.Pointer {
 type PatchGuard struct {
 	target      reflect.Value
 	replacement reflect.Value
+	alias		reflect.Value	// Use this interface to access the original target
 }
 
 func (g *PatchGuard) Unpatch() {
@@ -39,32 +43,35 @@ func (g *PatchGuard) Unpatch() {
 }
 
 func (g *PatchGuard) Restore() {
-	patchValue(g.target, g.replacement)
+	patchValue(g.target, g.replacement, g.alias)
 }
 
 // Patch replaces a function with another
-func Patch(target, replacement interface{}) *PatchGuard {
+// alias: A wrapper, to access the original target when patched
+func Patch(target, alias, replacement interface{}) *PatchGuard {
 	t := reflect.ValueOf(target)
 	r := reflect.ValueOf(replacement)
-	patchValue(t, r)
+	a := reflect.ValueOf(alias)
+	patchValue(t, r, a)
 
-	return &PatchGuard{t, r}
+	return &PatchGuard{t, r, a}
 }
 
 // PatchInstanceMethod replaces an instance method methodName for the type target with replacement
 // Replacement should expect the receiver (of type target) as the first argument
-func PatchInstanceMethod(target reflect.Type, methodName string, replacement interface{}) *PatchGuard {
+func PatchInstanceMethod(target reflect.Type, methodName string, alias, replacement interface{}) *PatchGuard {
 	m, ok := target.MethodByName(methodName)
 	if !ok {
 		panic(fmt.Sprintf("unknown method %s", methodName))
 	}
 	r := reflect.ValueOf(replacement)
-	patchValue(m.Func, r)
+	a := reflect.ValueOf(alias)
+	patchValue(m.Func, r, a)
 
-	return &PatchGuard{m.Func, r}
+	return &PatchGuard{m.Func, r, a}
 }
 
-func patchValue(target, replacement reflect.Value) {
+func patchValue(target, replacement, alias reflect.Value) {
 	lock.Lock()
 	defer lock.Unlock()
 
@@ -76,16 +83,28 @@ func patchValue(target, replacement reflect.Value) {
 		panic("replacement has to be a Func")
 	}
 
+	if alias.Kind() != reflect.Func {
+		panic("alias has to be a Func")
+	}
+
 	if target.Type() != replacement.Type() {
 		panic(fmt.Sprintf("target and replacement have to have the same type %s != %s", target.Type(), replacement.Type()))
+	}
+
+	if target.Type() != alias.Type() {
+		panic(fmt.Sprintf("target and alias have to have the same type %s != %s", target.Type(), alias.Type()))
 	}
 
 	if patch, ok := patches[target.Pointer()]; ok {
 		unpatch(target.Pointer(), patch)
 	}
 
+	addr := new(uintptr)
+	*addr = *(*uintptr)(getPtr(target)) + codeOffset()
+
+	aliasBytes := replaceFunction(alias.Pointer() + codeOffset(), (uintptr)(unsafe.Pointer(addr)))
 	bytes := replaceFunction(target.Pointer(), (uintptr)(getPtr(replacement)))
-	patches[target.Pointer()] = patch{bytes, &replacement}
+	patches[target.Pointer()] = patch{bytes, &replacement, alias.Pointer() + codeOffset(), aliasBytes, addr}
 }
 
 // Unpatch removes any monkey patches on target
@@ -130,4 +149,5 @@ func unpatchValue(target reflect.Value) bool {
 
 func unpatch(target uintptr, p patch) {
 	copyToLocation(target, p.originalBytes)
+	copyToLocation(p.aliasPatchedPos, p.aliasOriginalBytes)
 }

@@ -11,3 +11,7 @@ func jmpToFunctionValue(to uintptr) []byte {
 		0xFF, 0x22,     // jmp DWORD PTR [edx]
 	}
 }
+
+func codeOffset() uintptr {
+	panic("not supported yet!")
+}

@@ -15,3 +15,7 @@ func jmpToFunctionValue(to uintptr) []byte {
 		0xFF, 0x22,     // jmp QWORD PTR [rdx]
 	}
 }
+
+func codeOffset() uintptr {
+	return 15
+}
