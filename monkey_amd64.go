@@ -16,6 +16,10 @@ func jmpToFunctionValue(to uintptr) []byte {
 	}
 }
 
+func isAlreadyReplaced(bytes []byte) (bool) {
+	return bytes[0] == 0x48 && bytes[1] == 0xBA && bytes[10] == 0xFF && bytes[11] == 0x22
+}
+
 func codeOffset() uintptr {
 	return 15
 }

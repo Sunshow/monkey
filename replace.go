@@ -25,6 +25,9 @@ func replaceFunction(from, to uintptr) (original []byte) {
 	f := rawMemoryAccess(from, len(jumpData))
 	original = make([]byte, len(f))
 	copy(original, f)
+	if isAlreadyReplaced(original) {
+		panic("func already patched")
+	}
 
 	copyToLocation(from, jumpData)
 	return

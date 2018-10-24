@@ -1,6 +1,7 @@
 package monkey_test
 
 import (
+	"fmt"
 	"reflect"
 	"runtime"
 	"testing"
@@ -13,9 +14,12 @@ import (
 func no() bool  { return false }
 func yes() bool { return true }
 
+func originNow() time.Time {
+	fmt.Println("nothing")
+}
 func TestTimePatch(t *testing.T) {
 	before := time.Now()
-	monkey.Patch(time.Now, func() time.Time {
+	monkey.Patch(time.Now, originNow, func() time.Time {
 		return time.Date(2000, time.January, 1, 0, 0, 0, 0, time.UTC)
 	})
 	during := time.Now()
