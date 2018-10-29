@@ -10,11 +10,11 @@ import (
 // patch is an applied patch
 // needed to undo a patch
 type patch struct {
-	originalBytes []byte
-	replacement   *reflect.Value
-	aliasPatchedPos  uintptr
+	originalBytes      []byte
+	replacement        *reflect.Value
+	aliasPatchedPos    uintptr
 	aliasOriginalBytes []byte
-	addr *uintptr
+	addr               *uintptr
 }
 
 var (
@@ -35,7 +35,7 @@ func getPtr(v reflect.Value) unsafe.Pointer {
 type PatchGuard struct {
 	target      reflect.Value
 	replacement reflect.Value
-	alias		*reflect.Value	// Use this interface to access the original target
+	alias       *reflect.Value // Use this interface to access the original target
 }
 
 func (g *PatchGuard) Unpatch() {
@@ -122,8 +122,8 @@ func patchValue(target reflect.Value, replacement reflect.Value, alias *reflect.
 		unpatch(target.Pointer(), patch)
 	}
 
-	var addr *uintptr = nil
-	var aliasPos uintptr = 0
+	var addr *uintptr
+	var aliasPos uintptr
 	var aliasBytes []byte
 	if alias != nil {
 		addr = new(uintptr)

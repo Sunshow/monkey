@@ -20,7 +20,7 @@ func jmpToFunctionValue(to uintptr) []byte {
 	}
 }
 
-func isAlreadyReplaced(bytes []byte) (bool) {
+func isAlreadyReplaced(bytes []byte) bool {
 	return bytes[0] == 0x48 && bytes[1] == 0xBA && bytes[10] == 0xFF && bytes[11] == 0x22
 }
 
@@ -40,20 +40,21 @@ func codeOffset(from uintptr) uintptr {
 	mid := []byte{0x81, 0x83, 0x8d}
 	f := rawMemoryAccess(from, 40)
 	for _, v := range []int{15, 19, 24, 27, 31} {
-		if f[v] == byte(0x48) && f[v + 2] == byte(0xec) && inArray(f[v + 1], mid) {
+		if f[v] == byte(0x48) && f[v+2] == byte(0xec) && inArray(f[v+1], mid) {
 			return uintptr(v)
 		}
 	}
 
-	panic("\noffset not fund, raw data: \n")
+	panic("\nraw data: \n")
 	var i = 0
 	for _, v := range f {
 		i++
 		fmt.Printf("0x%02X ", v)
-		if i > 0 && (i % 8) == 0 {
+		if i > 0 && (i%8) == 0 {
 			fmt.Printf("\n")
 		}
 	}
-    
-    return 0
+	panic("\noffset not fund\n")
+
+	return 0
 }
