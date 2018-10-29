@@ -54,4 +54,6 @@ func codeOffset(from uintptr) uintptr {
 			fmt.Printf("\n")
 		}
 	}
+    
+    return 0
 }
