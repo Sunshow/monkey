@@ -126,20 +126,20 @@ func patchValue(target reflect.Value, replacement reflect.Value, alias *reflect.
 	var aliasPos uintptr
 	var aliasBytes []byte
 	if alias != nil {
-		targetOffset, aliasOffset, aliasOrininal := replaceJBE(target.Pointer(), (*alias).Pointer());
+		targetOffset, aliasOffset, aliasOrininal := replaceJBE(target.Pointer(), (*alias).Pointer())
 
 		addr = new(uintptr)
 		*addr = *(*uintptr)(getPtr(target)) + targetOffset
 		aliasPos = (*alias).Pointer() + aliasOffset
 		orininalBytes := replaceFunction(aliasPos, (uintptr)(unsafe.Pointer(addr)))
 
-		aliasBytes = make([]byte, len(aliasOrininal) + len(orininalBytes))
+		aliasBytes = make([]byte, len(aliasOrininal)+len(orininalBytes))
 		copy(aliasBytes, aliasOrininal)
 
 		capcity := len(aliasBytes)
 		len1 := len(aliasOrininal)
 		for i := len1; i < capcity; i++ {
-			aliasBytes[i] = orininalBytes[i - len1]
+			aliasBytes[i] = orininalBytes[i-len1]
 		}
 	}
 

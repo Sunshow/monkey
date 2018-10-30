@@ -105,7 +105,7 @@ func replaceJBE(target, alias uintptr) (targetOffset uintptr, aliasOffset uintpt
 		}
 	}
 
-	_, aAddrLen, moreStackOffset, ok := findJBEorJE(alias, aHead, 0);
+	_, aAddrLen, moreStackOffset, ok := findJBEorJE(alias, aHead, 0)
 	if !ok {
 		printRawData(aHead)
 		panic("jbe not found at alias head\n")
@@ -123,7 +123,7 @@ func replaceJBE(target, alias uintptr) (targetOffset uintptr, aliasOffset uintpt
 		}
 
 		addr := make([]byte, tAddrLen)
-		copy(addr, int2Bytes(int32(moreStackOffset - tPos - tAddrLen)))
+		copy(addr, int2Bytes(int32(moreStackOffset-tPos-tAddrLen)))
 		for i := 0; i < tAddrLen; i++ {
 			tHead[tPos+i] = addr[i]
 		}
@@ -139,7 +139,7 @@ func replaceJBE(target, alias uintptr) (targetOffset uintptr, aliasOffset uintpt
 }
 
 func findJBEorJE(ptr uintptr, buffer []byte, offset int) (pos int, addrLen int, moreStackOffset int, ok bool) {
-	m := []map[string][]byte{ //            instruction | offset
+	m := []map[string][]byte{ //                             instruction | offset
 		{"code": {0x76}, "insLen": {2}},       // jbe addr   0x76          0x61
 		{"code": {0x0f, 0x86}, "insLen": {6}}, // jbe addr   0x0f 0x86     0xd1 0x00 0x00 0x00
 		{"code": {0x0f, 0x84}, "insLen": {6}}, // je  addr   0x0f 0x84     0x12 0x01 0x00 0x00
