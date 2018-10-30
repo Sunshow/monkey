@@ -126,15 +126,25 @@ func patchValue(target reflect.Value, replacement reflect.Value, alias *reflect.
 	var aliasPos uintptr
 	var aliasBytes []byte
 	if alias != nil {
+		targetOffset, aliasOffset, aliasOrininal := replaceJBE(target.Pointer(), (*alias).Pointer());
+
 		addr = new(uintptr)
-		*addr = *(*uintptr)(getPtr(target)) + codeOffset(target.Pointer())
-		aliasPos = (*alias).Pointer() + codeOffset((*alias).Pointer())
-		aliasBytes = replaceFunction(aliasPos, (uintptr)(unsafe.Pointer(addr)))
+		*addr = *(*uintptr)(getPtr(target)) + targetOffset
+		aliasPos = (*alias).Pointer() + aliasOffset
+		orininalBytes := replaceFunction(aliasPos, (uintptr)(unsafe.Pointer(addr)))
+
+		aliasBytes = make([]byte, len(aliasOrininal) + len(orininalBytes))
+		copy(aliasBytes, aliasOrininal)
+
+		capcity := len(aliasBytes)
+		len1 := len(aliasOrininal)
+		for i := len1; i < capcity; i++ {
+			aliasBytes[i] = orininalBytes[i - len1]
+		}
 	}
 
-	bytes := replaceFunction(target.Pointer(), (uintptr)(getPtr(replacement)))
-
-	patches[target.Pointer()] = patch{bytes, &replacement, aliasPos, aliasBytes, addr}
+	orininalBytes := replaceFunction(target.Pointer(), (uintptr)(getPtr(replacement)))
+	patches[target.Pointer()] = patch{orininalBytes, &replacement, (*alias).Pointer(), aliasBytes, addr}
 }
 
 // Unpatch removes any monkey patches on target
