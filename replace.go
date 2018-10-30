@@ -167,7 +167,6 @@ func findJBEorJE(ptr uintptr, buffer []byte, offset int) (pos int, addrLen int, 
 				if isCallQ(ptr + uintptr(v)) {
 					return i + len(code), len(addr), v, true
 				}
-				printRawData(addr)
 			}
 		}
 	}
