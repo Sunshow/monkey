@@ -1,6 +1,7 @@
 package monkey
 
 import (
+	"bytes"
 	"fmt"
 	"reflect"
 	"syscall"
@@ -94,6 +95,15 @@ func copyMoreStack(from uintptr) []byte {
 func replaceJBE(target, alias uintptr) (targetOffset uintptr, aliasOffset uintptr, aliasOriginal []byte) {
 	aHead := copyMoreStack(alias)
 	tHead := copyMoreStack(target)
+
+	// 检查一下是不是空函数
+	int3 := []byte{0xcc, 0xcc, 0xcc, 0xcc, 0xcc}
+	lenH := len(aHead) - 5
+	for i := 0; i < lenH; i++ {
+		if bytes.Equal(aHead[i:i+5], int3) {
+			panic("alias不允许使用空函数\n")
+		}
+	}
 
 	_, aAddrLen, moreStackOffset, ok := findJBEorJE(alias, aHead, 0);
 	if !ok {
