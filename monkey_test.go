@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"bou.ke/monkey"
 	"github.com/stretchr/testify/assert"
+	"github.com/sychenjianjun/monkey"
 )
 
 func no() bool  { return false }
