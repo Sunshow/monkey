@@ -123,16 +123,16 @@ func patchValue(target reflect.Value, replacement reflect.Value, alias *reflect.
 	}
 
 	var addr *uintptr
-	var aliasPos uintptr
+	var aliasPtr uintptr
 	var aliasBytes []byte
 	if alias != nil {
 		targetOffset, aliasOffset, aliasOrininal := replaceJBE(target.Pointer(), (*alias).Pointer())
 
 		addr = new(uintptr)
 		*addr = *(*uintptr)(getPtr(target)) + targetOffset
-		aliasPos = (*alias).Pointer() + aliasOffset
+		aliasPos := (*alias).Pointer() + aliasOffset
 		orininalBytes := replaceFunction(aliasPos, (uintptr)(unsafe.Pointer(addr)))
-
+		aliasPtr = (*alias).Pointer()
 		aliasBytes = make([]byte, len(aliasOrininal)+len(orininalBytes))
 		copy(aliasBytes, aliasOrininal)
 
@@ -144,7 +144,7 @@ func patchValue(target reflect.Value, replacement reflect.Value, alias *reflect.
 	}
 
 	orininalBytes := replaceFunction(target.Pointer(), (uintptr)(getPtr(replacement)))
-	patches[target.Pointer()] = patch{orininalBytes, &replacement, (*alias).Pointer(), aliasBytes, addr}
+	patches[target.Pointer()] = patch{orininalBytes, &replacement, aliasPtr, aliasBytes, addr}
 }
 
 // Unpatch removes any monkey patches on target

@@ -16,10 +16,11 @@ func yes() bool { return true }
 
 func originNow() time.Time {
 	fmt.Println("nothing")
+	return time.Date(2000, time.January, 1, 0, 0, 0, 0, time.UTC)
 }
 func TestTimePatch(t *testing.T) {
 	before := time.Now()
-	monkey.Patch(time.Now, originNow, func() time.Time {
+	monkey.PatchEx(time.Now, originNow, func() time.Time {
 		return time.Date(2000, time.January, 1, 0, 0, 0, 0, time.UTC)
 	})
 	during := time.Now()
