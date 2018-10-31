@@ -22,6 +22,22 @@ func myfunc() (ret int) {
 	return
 }
 
+func no() bool {
+	v := 1000
+	for i := 0; i < 100; i++ {
+		v -= 20 * i
+	}
+	return v > 100
+}
+
+func yes() bool {
+	v := 0
+	for i := 0; i < 100; i++ {
+		v += i
+	}
+	return v > 100
+}
+
 func main() {
 	fmt.Println("test func")
 	monkey.PatchEx(myfunc, originmyfunc, func() (ret int) {
@@ -29,15 +45,18 @@ func main() {
 		originmyfunc()
 		return
 	})
-
 	myfunc()
 
-	monkey.Unpatch(myfunc)
+	monkey.PatchEx(yes, no, func() bool {
+		return false
+	})
+
+	monkey.UnpatchAll()
 	myfunc()
 	originmyfunc()
 }
 
 func originmyfunc() (ret int) {
-	fmt.Println("")
+	fmt.Println("nothing")
 	return 0
 }

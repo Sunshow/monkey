@@ -1,7 +1,6 @@
 package monkey
 
 import (
-	"bytes"
 	"fmt"
 	"reflect"
 	"syscall"
@@ -61,49 +60,9 @@ func memcopy(from uintptr, len int) []byte {
 	return original
 }
 
-//
-// 把函数头第一条调栈的sub指令位置找出来，并返回函数头到这条指令之间的所有代码
-//
-func copyMoreStack(from uintptr) []byte {
-	//
-	// 直接找sub指令的特征，有可能会有例外目测撞上的概率不高，等发现例外了再加入更多的特征
-	//
-	var inArray = func(v byte, arr []byte) bool {
-		for _, vv := range arr {
-			if v == vv {
-				return true
-			}
-		}
-		return false
-	}
-
-	mid := []byte{0x81, 0x83, 0x8d}
-	f := memcopy(from, 60)
-
-	for _, v := range []int{15, 19, 24, 27, 31, 49} {
-		if f[v] == byte(0x48) && f[v+2] == byte(0xec) && inArray(f[v+1], mid) {
-			return f[0:v]
-		}
-	}
-
-	printRawData(f)
-	panic("offset not fund\n")
-
-	return []byte{0}
-}
-
 func replaceJBE(target, alias uintptr) (targetOffset uintptr, aliasOffset uintptr, aliasOriginal []byte) {
-	aHead := copyMoreStack(alias)
-	tHead := copyMoreStack(target)
-
-	// 检查一下是不是空函数
-	int3 := []byte{0xcc, 0xcc, 0xcc, 0xcc, 0xcc}
-	lenH := len(aHead) - 5
-	for i := 0; i < lenH; i++ {
-		if bytes.Equal(aHead[i:i+5], int3) {
-			panic("alias不允许使用空函数\n")
-		}
-	}
+	aHead := copyMoreStack(memcopy(alias, 60))
+	tHead := copyMoreStack(memcopy(target, 60))
 
 	_, aAddrLen, moreStackOffset, ok := findJBEorJE(alias, aHead, 0)
 	if !ok {

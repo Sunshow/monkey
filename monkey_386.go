@@ -12,13 +12,6 @@ func jmpToFunctionValue(to uintptr) []byte {
 	}
 }
 
-func isAlreadyReplaced(bytes []byte) (bool) {
+func isAlreadyReplaced(bytes []byte) bool {
 	return bytes[0] == 0xBA && bytes[5] == 0xFF && bytes[6] == 0x22
-}
-
-func copyMoreStack(from uintptr) []byte {
-	panic("not supported yet!")
-}
-
-func findJBE(code []byte) map[uintptr][]byte {
 }

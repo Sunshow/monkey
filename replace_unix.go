@@ -24,3 +24,32 @@ func copyToLocation(location uintptr, data []byte) {
 		panic(err)
 	}
 }
+
+//
+// 把函数头第一条调栈的sub指令位置找出来，并返回函数头到这条指令之间的所有代码
+//
+func copyMoreStack(head []byte) []byte {
+	//
+	// 直接找sub指令的特征，有可能会有例外目测撞上的概率不高，等发现例外了再加入更多的特征
+	//
+	var inArray = func(v byte, arr []byte) bool {
+		for _, vv := range arr {
+			if v == vv {
+				return true
+			}
+		}
+		return false
+	}
+
+	mid := []byte{0x81, 0x83, 0x8d}
+	for _, v := range []int{15, 19, 24, 27, 31, 49} {
+		if head[v] == byte(0x48) && head[v+2] == byte(0xec) && inArray(head[v+1], mid) {
+			return head[0:v]
+		}
+	}
+
+	printRawData(head)
+	panic("offset not fund\n")
+
+	return []byte{}
+}
