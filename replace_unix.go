@@ -13,15 +13,24 @@ func copyToLocation(location uintptr, data []byte) {
 	f := rawMemoryAccess(location, len(data))
 
 	page := rawMemoryAccess(pageStart(location), syscall.Getpagesize())
-	err := syscall.Mprotect(page, syscall.PROT_READ|syscall.PROT_WRITE|syscall.PROT_EXEC)
-	if err != nil {
-		panic(err)
+	nextPage := rawMemoryAccess(pageStart(location) + uintptr(syscall.Getpagesize()), syscall.Getpagesize())
+	err1 := syscall.Mprotect(page, syscall.PROT_READ|syscall.PROT_WRITE|syscall.PROT_EXEC)
+	err2 := syscall.Mprotect(nextPage, syscall.PROT_READ|syscall.PROT_WRITE|syscall.PROT_EXEC)
+	if err1 != nil {
+		panic(err1)
+	}
+	if err2 != nil {
+		panic(err2)
 	}
 	copy(f, data[:])
 
-	err = syscall.Mprotect(page, syscall.PROT_READ|syscall.PROT_EXEC)
-	if err != nil {
-		panic(err)
+	err1 = syscall.Mprotect(page, syscall.PROT_READ|syscall.PROT_EXEC)
+	err2 = syscall.Mprotect(nextPage, syscall.PROT_READ|syscall.PROT_EXEC)
+	if err1 != nil {
+		panic(err1)
+	}
+	if err2 != nil {
+		panic(err2)
 	}
 }
 
