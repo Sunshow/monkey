@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/sychenjianjun/monkey"
+	"bou.ke/monkey"
 )
 
 func innerCall(param1, param2, param3, param4 [2000]byte) bool {

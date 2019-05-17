@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/sychenjianjun/monkey"
+	"bou.ke/monkey"
 )
 
 func main() {
